@@ -15,9 +15,11 @@ def main():
     with open(CONFIG_FILE) as json_file:
         configuration = json.load(json_file)
 
+    print (configuration)
+
     assert "server" in configuration['parameters']
     assert "username" in configuration['parameters']
-    assert "password" in configuration['parameters']
+    assert "#password" in configuration['parameters']
     assert "accept_from" in configuration['parameters']
     assert 'accept_filename' in configuration['parameters']
 
@@ -27,7 +29,7 @@ def main():
 
     mailbox = poplib.POP3(configuration['parameters']['server'])
     mailbox.user(configuration['parameters']['username'])
-    mailbox.pass_(configuration['parameters']['password'])
+    mailbox.pass_(configuration['parameters']['#password'])
 
     for i in reversed(range(len(mailbox.list()[1]))):
         print ("Reading an email from the mailbox")
