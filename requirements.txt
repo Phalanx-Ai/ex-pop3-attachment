@@ -1,0 +1,1 @@
+git+https://bitbucket.org/kds_consulting_team/keboola-python-util-lib.git
