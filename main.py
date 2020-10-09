@@ -10,12 +10,18 @@ from kbc.env_handler import KBCEnvHandler
 import logging
 from pathlib import Path
 
-APP_VERSION = "0.3.0"
+APP_VERSION = "0.3.2"
 
 
 class Component(KBCEnvHandler):
     DEFAULT_TIMEDELTA = 24
-    MANDATORY_PARS = ['server', 'username', '#password', 'accept_from', 'accept_filename']
+    MANDATORY_PARS = [
+        'server',
+        'username',
+        '#password',
+        'accept_from',
+        'accept_filename'
+    ]
 
     def __init__(self):
         # for easier local project setup
@@ -34,7 +40,8 @@ class Component(KBCEnvHandler):
 
         try:
             self.validate_config(self.MANDATORY_PARS)
-            self.cfg_params['accept_timedelta_hours'] = self.cfg_params.get('accept_timedelta_hours', self.DEFAULT_TIMEDELTA)
+            self.cfg_params['accept_timedelta_hours'] = \
+                self.cfg_params.get('accept_timedelta_hours', self.DEFAULT_TIMEDELTA)
             self.output_filename = '%s/out/files/%s' % (
                 os.getenv('KBC_DATADIR', '.'),
                 self.cfg_params['accept_filename']
@@ -57,23 +64,36 @@ class Component(KBCEnvHandler):
             lines = mailbox.retr(i+1)[1]
             msg_content = b'\r\n'.join(lines).decode('utf-8')
             email = Parser().parsestr(msg_content)
-            email_datetime = datetime.datetime.fromtimestamp(mktime_tz(parsedate_tz(email.get_all('Date')[0])))
+            email_datetime = datetime.datetime.fromtimestamp(
+                mktime_tz(parsedate_tz(email.get_all('Date')[0]))
+            )
 
             if now_datetime - timedelta(hours=params['accept_timedelta_hours']) > email_datetime:
-                logging.info("Email is older than 'accept_timedelta_hours'. Email is ignored and extracting is done")
+                logging.info(
+                    "Email is older than 'accept_timedelta_hours'. "
+                    "The email is ignored and extracting is done")
                 break
 
             if not (params['accept_from'] in email.get_all('From')[0]):
-                logging.info("Email is not from the 'accept_from' address but <%s>. Email is ignored" % (params['accept_from']))
+                logging.info(
+                    "Email is not from the 'accept_from' address but from <%s>. "
+                    "The email is ignored" % (params['accept_from'])
+                )
                 continue
 
             logging.info("Parsing the content of the email...")
 
             for part in email.get_payload():
                 if (part.get_filename() != params['accept_filename']):
-                    logging.info("Email attachment is not the name that is accepted but '%s'. Attachment is ignored" % (part.get_filename()))
+                    logging.info(
+                        "Email attachment is not the name that is accepted but '%s'. "
+                        "The attachment is ignored" % (part.get_filename())
+                    )
                     continue
 
+                logging.info(
+                    "Valid email attachment found, downloading..."
+                )
                 fp = open(self.output_filename, 'wb')
                 fp.write(part.get_payload(decode=True))
                 fp.close()
