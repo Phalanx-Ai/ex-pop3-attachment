@@ -1,0 +1,11 @@
+{
+    "parameters": {
+        "username": "john",
+        "#password": "simple-password",
+        "server": "pop3.server.com",
+        "accept_from": "reporting@server.com",
+        "accept_filename": "keboola-export.xls"
+    },
+    "image_parameters" : {
+    }
+}
