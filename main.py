@@ -1,4 +1,5 @@
 import poplib
+import socket
 import datetime
 from datetime import timedelta
 from email.parser import Parser
@@ -54,10 +55,16 @@ class Component(KBCEnvHandler):
         params = self.cfg_params
         now_datetime = datetime.datetime.now()
 
-        logging.info('Logging into the mailbox...')
-        mailbox = poplib.POP3(params['server'])
-        mailbox.user(params['username'])
-        mailbox.pass_(params['#password'])
+        mailbox = None
+        try:
+            logging.info('Logging into the mailbox...')
+            mailbox = poplib.POP3(params['server'])
+            mailbox.user(params['username'])
+            mailbox.pass_(params['#password'])
+        except poplib.error_proto as error:
+            raise RuntimeError('Unable to connect to the server. Please check: server, username and password')
+        except socket.gaierror as error:
+            raise RuntimeError('Unable to resolve the server name')
 
         for i in reversed(range(len(mailbox.list()[1]))):
             logging.info("Reading an email from the mailbox...")
@@ -110,6 +117,9 @@ if __name__ == "__main__":
     try:
         comp = Component()
         comp.run()
+    except (RuntimeError, Exception) as err:
+        logging.error(str(err))
+        exit(1)
     except Exception as exc:
         logging.exception(exc)
         exit(1)
