@@ -11,7 +11,7 @@ from kbc.env_handler import KBCEnvHandler
 import logging
 from pathlib import Path
 
-APP_VERSION = "0.3.3"
+APP_VERSION = "0.3.4"
 
 
 class Component(KBCEnvHandler):
@@ -121,5 +121,5 @@ if __name__ == "__main__":
         logging.error(str(err))
         exit(1)
     except Exception as exc:
-        logging.exception(exc)
+        logging.error("Job Error")
         exit(1)
