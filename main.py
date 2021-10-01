@@ -6,12 +6,13 @@ from email.parser import Parser
 from email.utils import parsedate_tz, mktime_tz
 import sys
 import os
+import re
 
 from kbc.env_handler import KBCEnvHandler
 import logging
 from pathlib import Path
 
-APP_VERSION = "0.3.4"
+APP_VERSION = "0.4.0"
 
 
 class Component(KBCEnvHandler):
@@ -21,7 +22,7 @@ class Component(KBCEnvHandler):
         'username',
         '#password',
         'accept_from',
-        'accept_filename'
+        ['accept_filename', 'accept_re_filename']
     ]
 
     def __init__(self):
@@ -43,10 +44,6 @@ class Component(KBCEnvHandler):
             self.validate_config(self.MANDATORY_PARS)
             self.cfg_params['accept_timedelta_hours'] = \
                 self.cfg_params.get('accept_timedelta_hours', self.DEFAULT_TIMEDELTA)
-            self.output_filename = '%s/out/files/%s' % (
-                os.getenv('KBC_DATADIR', '.'),
-                self.cfg_params['accept_filename']
-            )
         except ValueError as e:
             logging.exception(e)
             exit(1)
@@ -91,9 +88,18 @@ class Component(KBCEnvHandler):
             logging.info("Parsing the content of the email...")
 
             for part in email.get_payload():
-                if (part.get_filename() != params['accept_filename']):
+                if (part.get_filename() is None):
+                    continue
+
+                if (('accept_filename' in params) and (part.get_filename() != params['accept_filename'])):
                     logging.info(
                         "Email attachment is not the name that is accepted but '%s'. "
+                        "The attachment is ignored" % (part.get_filename())
+                    )
+                    continue
+                elif (('accept_re_filename' in params) and (re.match(params['accept_re_filename'], part.get_filename())) is None):
+                    logging.info(
+                        "Email attachment is not accepted by RE: '%s'. "
                         "The attachment is ignored" % (part.get_filename())
                     )
                     continue
@@ -101,7 +107,25 @@ class Component(KBCEnvHandler):
                 logging.info(
                     "Valid email attachment found, downloading..."
                 )
-                fp = open(self.output_filename, 'wb')
+
+                output_filename = None
+                if ('accept_filename' in params):
+                    output_filename = '%s/out/files/%s' % (
+                        os.getenv('KBC_DATADIR', '.'),
+                        self.cfg_params['accept_filename']
+                    )
+                elif ('accept_re_filename' in params):
+                    output_filename = '%s/out/files/%s' % (
+                        os.getenv('KBC_DATADIR', '.'),
+                        part.get_filename()
+                    )
+
+                if (output_filename is None):
+                    logging.info(
+                        "Unable to determine the name of the output file"
+                    )
+
+                fp = open(output_filename, 'wb')
                 fp.write(part.get_payload(decode=True))
                 fp.close()
 

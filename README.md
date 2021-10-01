@@ -11,7 +11,10 @@ A configuration consist of mostly mandatory parameters. A sample configuration c
 * password (`#password`) - a password associated with username
 * valid email address (`accept_from`) - accept only emails from a given address
 * valid filename of attachment (`accept_filename`) - accept only attachments with a given filename
+* valid RE of filename of attachement (`accept_re_filename`) - accept only attachments that matches RE
+
+One of `accept_filename`, `accept_re_filename` is required.
 
 ## Output
 
-A file with content of email attachment, the name matches the filename of the attachment. 
+A file with content of email attachment, the name matches the filename of the attachment in case of `accept_filename`. When regular expression is set than the name of the file is same as the name of the original attachments in the email.
