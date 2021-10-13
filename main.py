@@ -12,7 +12,7 @@ from kbc.env_handler import KBCEnvHandler
 import logging
 from pathlib import Path
 
-APP_VERSION = "0.4.0"
+APP_VERSION = "0.4.1"
 
 
 class Component(KBCEnvHandler):
@@ -80,8 +80,8 @@ class Component(KBCEnvHandler):
 
             if not (params['accept_from'] in email.get_all('From')[0]):
                 logging.info(
-                    "Email is not from the 'accept_from' address but from <%s>. "
-                    "The email is ignored" % (params['accept_from'])
+                    "Email is not from the 'accept_from' address (<%s>) but from <%s>. "
+                    "The email is ignored" % (params['accept_from'], email.get_all('From')[0])
                 )
                 continue
 
