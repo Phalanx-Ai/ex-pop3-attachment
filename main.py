@@ -4,6 +4,7 @@ import datetime
 from datetime import timedelta
 from email.parser import Parser
 from email.utils import parsedate_tz, mktime_tz
+from email.header import decode_header
 import sys
 import os
 import re
@@ -87,20 +88,27 @@ class Component(KBCEnvHandler):
 
             logging.info("Parsing the content of the email...")
 
-            for part in email.get_payload():
+            for part in email.walk():
                 if (part.get_filename() is None):
                     continue
 
-                if (('accept_filename' in params) and (part.get_filename() != params['accept_filename'])):
+                filename = None
+                raw_filename = part.get_filename()
+                if (raw_filename is not None) and (decode_header(raw_filename)[0][1] is not None):
+                    filename = decode_header(raw_filename)[0][0].decode(decode_header(raw_filename)[0][1])
+                else:
+                    filename = raw_filename
+
+                if (('accept_filename' in params) and (filename != params['accept_filename'])):
                     logging.info(
                         "Email attachment is not the name that is accepted but '%s'. "
-                        "The attachment is ignored" % (part.get_filename())
+                        "The attachment is ignored" % (filename)
                     )
                     continue
                 elif (('accept_re_filename' in params) and (re.match(params['accept_re_filename'], part.get_filename())) is None):
                     logging.info(
                         "Email attachment is not accepted by RE: '%s'. "
-                        "The attachment is ignored" % (part.get_filename())
+                        "The attachment is ignored" % (filename)
                     )
                     continue
 
@@ -117,7 +125,7 @@ class Component(KBCEnvHandler):
                 elif ('accept_re_filename' in params):
                     output_filename = '%s/out/files/%s' % (
                         os.getenv('KBC_DATADIR', '.'),
-                        part.get_filename()
+                        filename
                     )
 
                 if (output_filename is None):
