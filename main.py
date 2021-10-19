@@ -13,7 +13,7 @@ from kbc.env_handler import KBCEnvHandler
 import logging
 from pathlib import Path
 
-APP_VERSION = "0.4.1"
+APP_VERSION = "0.4.2"
 
 
 class Component(KBCEnvHandler):
