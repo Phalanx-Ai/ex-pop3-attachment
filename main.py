@@ -13,7 +13,7 @@ from kbc.env_handler import KBCEnvHandler
 import logging
 from pathlib import Path
 
-APP_VERSION = "0.4.4"
+APP_VERSION = "0.4.5"
 
 
 class Component(KBCEnvHandler):
@@ -99,13 +99,13 @@ class Component(KBCEnvHandler):
                 else:
                     filename = raw_filename
 
-                if (('accept_filename' in params) and (filename != params['accept_filename'])):
+                if (('accept_filename' in params) and (params['accept_filename'] != "") and (filename != params['accept_filename'])):
                     logging.info(
                         "Email attachment is not the name that is accepted but '%s'. "
                         "The attachment is ignored" % (filename)
                     )
                     continue
-                elif (('accept_re_filename' in params) and (re.match(params['accept_re_filename'], part.get_filename())) is None):
+                elif (('accept_re_filename' in params) and (params['accept_re_filename'] != "") and (re.match(params['accept_re_filename'], part.get_filename())) is None):
                     logging.info(
                         "Email attachment is not accepted by RE: '%s'. "
                         "The attachment is ignored" % (filename)
