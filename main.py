@@ -13,7 +13,7 @@ from kbc.env_handler import KBCEnvHandler
 import logging
 from pathlib import Path
 
-APP_VERSION = "0.4.6"
+APP_VERSION = "0.5.0"
 
 
 class Component(KBCEnvHandler):
@@ -117,7 +117,9 @@ class Component(KBCEnvHandler):
                 )
 
                 output_filename = None
-                if (('accept_filename' in params) and (params['accept_filename'] != '')):
+                if (('output_filename' in params) and (params['output_filename'] != '')):
+                    output_filename = params['output_filename']
+                elif (('accept_filename' in params) and (params['accept_filename'] != '')):
                     output_filename = '%s/out/files/%s' % (
                         os.getenv('KBC_DATADIR', '.'),
                         self.cfg_params['accept_filename']
